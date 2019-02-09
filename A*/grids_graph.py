@@ -1,17 +1,27 @@
 # pylint: disable=no-member
+"""
+normal grid colour: white
+close set grid colour: red
+open set grid colour: yellow
+wall grid colour: black
+path grid colour: blue
+"""
 import pygame
 import sys
 from math import sqrt
-
+import random
 
 class grid(object):
     def __init__(self, x, y):
         self.x, self.y = x, y
-        self.col = (255, 0, 0)
+        self.col = (255, 255, 255)
         self.f, self.h, self.g = 0, 0, 0
         self.neighbours = []
         self.parent = None
-
+        self.wall = False
+        if random.random() < 0.3:
+            self.wall = True
+            self.col = (0, 0, 0)
 
 class grids_graph(object):
     def __init__(self, width, height):
@@ -23,7 +33,8 @@ class grids_graph(object):
         for i in range(self.width):
             self.grids.append([])
             for j in range(self.height):
-                self.grids[i].append(grid(i, j)) # j is the x value in this kind of loop style
+                self.grids[i].append(grid(i, j))
+
         # add neighbours after all grids are initilized
         for i in range(self.width):
             for j in range(self.height):
@@ -36,16 +47,18 @@ class grids_graph(object):
                 if i + 1 < self.width:
                     self.grids[i][j].neighbours.append(self.grids[i+1][j])
 
-
 class A_star_search(object):
     def __init__(self, graph, start, end):
         self.graph = graph
         self.open_set = []
         self.close_set = []
+        # make sure the start and end is not wall
         self.start_grid = self.graph.grids[start[0]][start[1]]
+        self.start_grid.wall = False
         self.start_grid.col = (0, 255, 100)
         self.end_grid = self.graph.grids[end[0]][end[1]]
-        self.end_grid.col = (0, 0, 0)
+        self.end_grid.wall = False
+        self.end_grid.col = (0, 255, 100)
         pygame.init()
         self.screen = pygame.display.set_mode((graph.width, graph.height), pygame.RESIZABLE)
         self.bg_color = (255, 255, 255)
@@ -60,10 +73,11 @@ class A_star_search(object):
 
     @staticmethod
     def mark_path(grid):
+        grid.col = (0, 0, 255)
         last = grid.parent
         while last:
             #print(last.x, last.y)
-            last.col = (0, 0, 0)
+            last.col = (0, 0, 255)
             last = last.parent
 
     @staticmethod
@@ -73,7 +87,7 @@ class A_star_search(object):
 
     def recolor_close_set(self):
         for g in self.close_set:
-            g.col = (255, 255, 255)
+            g.col = (255, 0, 0)
 
     def run_search(self):
         self.start_grid.f = self.heuristic((self.start_grid.x, self.start_grid.y), (self.end_grid.x, self.end_grid.y))
@@ -82,12 +96,13 @@ class A_star_search(object):
             if self.search_finished:
                 pass
             else:
-                # A* searching --------------------------------------------------------------
                 # remove current path
                 self.recolor_close_set()
+                # A* searching --------------------------------------------------------------
                 if not self.open_set:
                     print('Path not found!')
                     self.search_finished = True
+                    continue
                 current_index = self.find_lowest_f_grid_index()
                 current = self.open_set[current_index]
                 # show current path, remove below
@@ -100,10 +115,11 @@ class A_star_search(object):
                     self.open_set.pop(current_index)
                     self.close_set.append(current)
                     for n in current.neighbours:
-                        if n in self.close_set:
+                        if (n in self.close_set) or (n.wall):
                             continue
                         if n not in self.open_set:
                             self.open_set.append(n)
+                            n.col = (0, 255, 0)
                             old_n_g = float('inf')
                         else:
                             old_n_g = n.g
@@ -128,7 +144,7 @@ class A_star_search(object):
 
 
 if __name__ == "__main__":
-    graph = grids_graph(100, 150)
+    graph = grids_graph(100, 100)
     graph.init_grids()
 
     # for i in range(graph.height):
@@ -137,5 +153,5 @@ if __name__ == "__main__":
     #         print('neighbours:')
     #         for n in graph.grids[i][j].neighbours:
     #             print(n.x, n.y, end = ', ')
-    A_star = A_star_search(graph, (0, 0), (45, 60))
+    A_star = A_star_search(graph, (0, 0), (60, 78))
     A_star.run_search()
