@@ -35,17 +35,30 @@ class grids_graph(object):
             for j in range(self.height):
                 self.grids[i].append(grid(i, j))
 
-        # add neighbours after all grids are initilized
+        # add neighbours (grid object, distance) after all grids are initilized
         for i in range(self.width):
             for j in range(self.height):
                 if j - 1 >= 0:
-                    self.grids[i][j].neighbours.append(self.grids[i][j-1])
+                    self.grids[i][j].neighbours.append((self.grids[i][j-1], 1))
                 if j + 1 < self.height:
-                    self.grids[i][j].neighbours.append(self.grids[i][j+1])
+                    self.grids[i][j].neighbours.append((self.grids[i][j+1], 1))
                 if i - 1 >= 0:
-                    self.grids[i][j].neighbours.append(self.grids[i-1][j])
+                    self.grids[i][j].neighbours.append((self.grids[i-1][j], 1))
                 if i + 1 < self.width:
-                    self.grids[i][j].neighbours.append(self.grids[i+1][j])
+                    self.grids[i][j].neighbours.append((self.grids[i+1][j], 1))
+                # diags:
+                if (i + 1 < self.width) and (j + 1 < self.height):
+                    self.grids[i][j].neighbours.append((self.grids[i+1][j+1], sqrt(2)))
+                if (i + 1 < self.width) and (j - 1 >= 0):
+                    self.grids[i][j].neighbours.append((self.grids[i+1][j-1], sqrt(2)))
+                if (i - 1 >= 0) and (j + 1 < self.height):
+                    self.grids[i][j].neighbours.append((self.grids[i-1][j+1], sqrt(2)))
+                if (i - 1 >= 0) and (j - 1 >= 0):
+                    self.grids[i][j].neighbours.append((self.grids[i-1][j-1], sqrt(2)))
+
+
+
+
 
 class A_star_search(object):
     def __init__(self, graph, start, end):
@@ -114,7 +127,7 @@ class A_star_search(object):
                 else:
                     self.open_set.pop(current_index)
                     self.close_set.append(current)
-                    for n in current.neighbours:
+                    for n, d in current.neighbours:
                         if (n in self.close_set) or (n.wall):
                             continue
                         if n not in self.open_set:
@@ -123,8 +136,8 @@ class A_star_search(object):
                             old_n_g = float('inf')
                         else:
                             old_n_g = n.g
-                        if current.g + 1 < old_n_g: 
-                            n.g = current.g + 1
+                        if current.g + d < old_n_g: 
+                            n.g = current.g + d
                             n.parent = current
                             n.f = n.g + self.heuristic((n.x, n.y), (self.end_grid.x, self.end_grid.y))
                 # -----------------------------------------------------------------------------
