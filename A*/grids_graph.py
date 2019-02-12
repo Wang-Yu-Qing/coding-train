@@ -136,7 +136,7 @@ class A_star_search(object):
                             old_n_g = float('inf')
                         else:
                             old_n_g = n.g
-                        if current.g + d < old_n_g: 
+                        if current.g + d < old_n_g: # distance to travel from current node to this neighbour
                             n.g = current.g + d
                             n.parent = current
                             n.f = n.g + self.heuristic((n.x, n.y), (self.end_grid.x, self.end_grid.y))
