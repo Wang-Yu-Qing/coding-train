@@ -54,7 +54,7 @@ class maze_builder(object):
         curr_grid = self.grids[0][0]
         curr_grid.checked = True
         while True:
-            time.sleep(0.05)
+            #time.sleep(0.01)
             if self.build_finish():
                 print('buid finish!')
             else:
