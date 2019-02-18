@@ -1,7 +1,7 @@
 import random
 import numpy as np
 
-Unicode_index = [32, 46] + list(range(49, 92)) + list(range(93, 123)) # generate unicode 32, 46, 49~91, 93~122
+Unicode_index = [32, 46] + list(range(65, 91)) + list(range(97, 123)) # generate unicode 32, 46, 49~91, 93~122
 
 class element(object):
     def __init__(self, gene):
@@ -42,7 +42,7 @@ class element(object):
             
 
 class Solution(object):
-    def __init__(self, target, population_size = 700, mutation_rate = 0.01):
+    def __init__(self, target, population_size = 150, mutation_rate = 0.01):
         self.target = target
         self.target_len = len(target)
         self.population_size = population_size
@@ -63,7 +63,7 @@ class Solution(object):
         self.total_fitness = 0
         for e in self.population:
             e.calculate_fitness(self.target)
-            if e.fitness > self.best_element.fitness:
+            if e.fitness >= self.best_element.fitness:
                 self.best_element = e
             self.total_fitness += e.fitness
         self.average_fitness = self.total_fitness/self.population_size
@@ -75,7 +75,7 @@ class Solution(object):
     def generate_matingpool(self):
         self.mating_pool = []
         for e in self.population:
-            for _ in range(int(e.fitness * 100)):
+            for _ in range(e.fitness * 50):
                 self.mating_pool.append(e)
 
     def generate_next_generation(self):
@@ -98,5 +98,6 @@ class Solution(object):
         print('\nDone!')
 
 if __name__ == "__main__":
-    s = Solution(target = 'To be or not to be this is a question.', mutation_rate = 0.01) # change the target to any sentence/words if you want
+    #s = Solution(target = 'To be or not to be this is a question.', mutation_rate = 0.01) # change the target to any sentence/words if you want
+    s = Solution(target = 'To be or not to.', mutation_rate = 0.01)
     s.run()
