@@ -9,18 +9,26 @@ class element(object):
         self.fitness = 0
     
     def calculate_fitness(self, target):
-        self.fitness = sum([t == e for t, e in zip(list(target), list(self.gene))])
+        self.fitness = sum([t == e for t, e in zip(list(target), list(self.gene))]) ** 2
 
     def crossover(self, mate):
         child_gene = ''
+        ## one father one mother way:
         # for i in range(len(self.gene)):
         #     if i % 2 == 0:
         #         child_gene += self.gene[i]
         #     else:
         #         child_gene += mate.gene[i]
-        middle = int(len(self.gene)/2)
+        ## first half father, second half mother way:
+        # middle = int(len(self.gene)/2)
+        # for i in range(len(self.gene)):
+        #     if i < middle:
+        #         child_gene += self.gene[i]
+        #     else:
+        #         child_gene += mate.gene[i]
+        ## random way:
         for i in range(len(self.gene)):
-            if i < middle:
+            if random.random() < 0.5:
                 child_gene += self.gene[i]
             else:
                 child_gene += mate.gene[i]
@@ -29,16 +37,10 @@ class element(object):
     def mutation(self, mutation_rate):
         global Unicode_index
         gene = list(self.gene)
-        f = 0
         for i in range(len(gene)):
             if random.random() < mutation_rate:
-                f += 1
                 gene[i] = chr(random.choice(Unicode_index))
-        # if f > 0:
-        #     print('before:', self.gene)
         self.gene = ''.join(gene)
-        # if f > 0:
-        #     print('after:', self.gene)
             
 
 class Solution(object):
@@ -75,21 +77,40 @@ class Solution(object):
     def generate_matingpool(self):
         self.mating_pool = []
         for e in self.population:
-            for _ in range(e.fitness * 50):
+            for _ in range(int(e.fitness) * 70):
                 self.mating_pool.append(e)
 
+    def choose_a_mate(self):
+        """
+        accept reject method that can replace the self.generate_matingpool
+        https://www.youtube.com/watch?v=816ayuhDo0E&index=7&list=PLRqwX-V7Uu6bJM3VgzjNV5YxVxUwzALHV
+        """
+        while True:
+            # random choose a element from population
+            candidate = random.choice(self.population)
+            # random choose a number between 0 and maxfitness
+            fitness_threshold = random.choice(range(self.best_element.fitness))
+            # if candidate's fitness is less than the fitness threshold, reject it
+            if candidate.fitness <= fitness_threshold:
+                continue
+            else:
+                return candidate
+
     def generate_next_generation(self):
-        self.generate_matingpool()
+        #self.generate_matingpool()
         next_generation = []
         for _ in range(self.population_size):
             # chose two parents to generate child:
-            parent_A, parent_B = random.choice(self.mating_pool), random.choice(self.mating_pool)
+            #parent_A, parent_B = random.choice(self.mating_pool), random.choice(self.mating_pool)
+            parent_A, parent_B = self.choose_a_mate(), self.choose_a_mate()
             child_gene = parent_A.crossover(parent_B)
             child = element(child_gene)
             child.mutation(self.mutation_rate)
             next_generation.append(child)
         self.population = next_generation
         self.total_generations += 1
+
+
 
     def run(self):
         while self.best_element.gene != self.target:
@@ -98,6 +119,8 @@ class Solution(object):
         print('\nDone!')
 
 if __name__ == "__main__":
-    #s = Solution(target = 'To be or not to be this is a question.', mutation_rate = 0.01) # change the target to any sentence/words if you want
-    s = Solution(target = 'To be or not to.', mutation_rate = 0.01)
+    # change the target to any sentence/words with letters within Unicode_index if you want
+    s = Solution(target = 'To be or not to be this is a question.', mutation_rate = 0.01)
+    #s = Solution(target = 'To be or not to be', mutation_rate = 0.05)
+    #s = Solution(target = 'mother fucker.', mutation_rate = 0.01)
     s.run()
