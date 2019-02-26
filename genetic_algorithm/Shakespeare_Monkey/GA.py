@@ -13,20 +13,20 @@ class element(object):
 
     def crossover(self, mate):
         child_gene = ''
-        ## one father one mother way:
+        ##--> one from father and one from mother way:
         # for i in range(len(self.gene)):
         #     if i % 2 == 0:
         #         child_gene += self.gene[i]
         #     else:
         #         child_gene += mate.gene[i]
-        ## first half father, second half mother way:
+        ##--> first half from father, second half from mother way:
         # middle = int(len(self.gene)/2)
         # for i in range(len(self.gene)):
         #     if i < middle:
         #         child_gene += self.gene[i]
         #     else:
         #         child_gene += mate.gene[i]
-        ## random way:
+        ##--> random way:
         for i in range(len(self.gene)):
             if random.random() < 0.5:
                 child_gene += self.gene[i]
@@ -70,7 +70,7 @@ class Solution(object):
             self.total_fitness += e.fitness
         self.average_fitness = self.total_fitness/self.population_size
         print('best:', self.best_element.gene, 
-              'best fitness:{}/{}'.format(self.best_element.fitness, len(self.target)), 
+              'best fitness:{}/{}'.format(self.best_element.fitness, len(self.target)**2), 
               'AF:', round(self.average_fitness, 2),
               'TG:', self.total_generations, 'MR', self.mutation_rate, end = '\r')
 
@@ -82,7 +82,7 @@ class Solution(object):
 
     def choose_a_mate(self):
         """
-        accept reject method that can replace the self.generate_matingpool
+        accept reject method that can replace the self.generate_matingpool function
         https://www.youtube.com/watch?v=816ayuhDo0E&index=7&list=PLRqwX-V7Uu6bJM3VgzjNV5YxVxUwzALHV
         """
         while True:
