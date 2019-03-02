@@ -4,13 +4,17 @@ import sys
 import random
 from math import sqrt
 import pygame
+import pygame.freetype
 from City import City 
+import math
  
 class Travel_salesman(object):
     def __init__(self, width, height, city_width, n_cities):
         self.width = width
         self.height = height
         pygame.init()
+        pygame.font.init()
+        self.font = pygame.freetype.SysFont('Comic Sans MS', 30) # font name and size
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.bg_color = (87, 250, 255)
         self.current_path = [] # the city sequence stored in self.current_path represents the current travel sequence
@@ -21,6 +25,8 @@ class Travel_salesman(object):
         self.best_path = self.current_path.copy() # copy! not reference!
         self.best_path_distance = float('Inf')
         self.best_path_color = (150, 0, 255)
+        self.n_possible = math.factorial(n_cities)
+        self.n_checked = 0
         
     @staticmethod
     def calculate_distance(p1, p2):
@@ -79,7 +85,7 @@ class Travel_salesman(object):
                 next_city_position = (self.current_path[index + 1].center_x, self.current_path[index + 1].center_y)
                 pygame.draw.line(self.screen, self.current_path_color, current_city_position, next_city_position, 5)
                 self.current_path_distance +=  self.calculate_distance(current_city_position, next_city_position)
-        #print('')
+        self.n_checked += 1
 
     def show_best_path(self):
         for index in range(self.n_cities - 1):
@@ -93,7 +99,9 @@ class Travel_salesman(object):
         if self.current_path_distance < self.best_path_distance:
             self.best_path = self.current_path.copy() # copy! not reference!
             self.best_path_distance = self.current_path_distance
-            print('update best path with distance:{}'.format(self.best_path_distance))
+            
+            #print('update best path with distance:{}'.format(self.best_path_distance))
+
 
     def find_path(self):
         Finish = False
@@ -111,6 +119,7 @@ class Travel_salesman(object):
             self.show_best_path()
             if not Finish:
                 Finish = self.update_current_path(self.current_path)
+            self.font.render_to(self.screen, (50, 50), '{}% finished'.format(("%.2f" % round(self.n_checked/self.n_possible*100, 2))), (0, 0, 0))
             pygame.display.flip()
             step += 1
 
